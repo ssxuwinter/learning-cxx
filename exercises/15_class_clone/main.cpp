@@ -10,17 +10,28 @@ class DynFibonacci {
 
 public:
     // TODO: 实现动态设置容量的构造器
-    DynFibonacci(int capacity): cache(new ?), cached(?) {}
+    DynFibonacci(int capacity): 
+        cache(new size_t[capacity]{0,1}), 
+        cached(2) {}
 
     // TODO: 实现复制构造器
-    DynFibonacci(DynFibonacci const &) = delete;
+    //others 表示复制的其它的
+    DynFibonacci(DynFibonacci const &others) :
+    //构造初始化列表
+        cache(new size_t[others.cached]),
+        cached(others.cached) {
+        //复制内容
+        std::memcpy(cache, others.cache, sizeof(size_t) * cached);
+    }
 
     // TODO: 实现析构器，释放缓存空间
-    ~DynFibonacci();
+    ~DynFibonacci(){
+        delete[] cache;
+    };
 
     // TODO: 实现正确的缓存优化斐波那契计算
     size_t get(int i) {
-        for (; false; ++cached) {
+        for (; cached <= i; ++cached) {
             cache[cached] = cache[cached - 1] + cache[cached - 2];
         }
         return cache[i];

@@ -10,6 +10,11 @@ struct Tensor4D {
     Tensor4D(unsigned int const shape_[4], T const *data_) {
         unsigned int size = 1;
         // TODO: 填入正确的 shape 并计算 size
+        for (int i = 0; i < 4; ++i) {
+            shape[i] = shape_[i];
+            //计算总空间
+            size *= shape[i];
+        }
         data = new T[size];
         std::memcpy(data, data_, size * sizeof(T));
     }
@@ -28,6 +33,33 @@ struct Tensor4D {
     // 则 `this` 与 `others` 相加时，3 个形状为 `[1, 2, 1, 4]` 的子张量各自与 `others` 对应项相加。
     Tensor4D &operator+=(Tensor4D const &others) {
         // TODO: 实现单向广播的加法
+        bool broadcast[4];
+        for (int i = 0; i < 4; ++i) {
+            broadcast[i] = (shape[i] != others.shape[i] && others.shape[i] == 1);
+        }
+        auto dst = this->data;
+        auto src = others.data;
+        T *marks[4]={src};
+        for (int i0 = 0; i0 < shape[0]; ++i0) {
+            //找到锚点
+            //如果这个阶是广播的，回到锚点位置
+            if(broadcast[0]) src = marks[0];
+            //记录下一节锚点位置 
+            marks[1] = src;
+            for (int i1 = 0; i1 < shape[1]; ++i1) {
+                if(broadcast[1]) src = marks[1];
+                marks[2] = src;
+                for (int i2 = 0; i2 < shape[2]; ++i2) {
+                    if(broadcast[2]) src = marks[2];
+                    marks[3] = src;
+                    for (int i3 = 0; i3 < shape[3]; ++i3) {
+                        if(broadcast[3]) src = marks[3];
+                        *dst++ += *src++;
+                    }
+                }
+            }
+        }
+
         return *this;
     }
 };
@@ -67,6 +99,7 @@ int main(int argc, char **argv) {
         // clang-format on
         unsigned int s1[]{1, 2, 3, 1};
         // clang-format off
+        //广播 一列当4列用
         float d1[]{
             6,
             5,

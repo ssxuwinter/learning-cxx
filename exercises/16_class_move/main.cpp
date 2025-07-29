@@ -14,22 +14,53 @@ class DynFibonacci {
     int cached;
 
 public:
-    // TODO: 实现动态设置容量的构造器
-    DynFibonacci(int capacity): cache(new ?), cached(?) {}
+    // TODO: 实现动态设置容量的构造器 构造函数
+    DynFibonacci(int capacity): cache(new size_t[capacity]{0,1}), cached(2) {}
 
-    // TODO: 实现移动构造器
-    DynFibonacci(DynFibonacci &&) noexcept = delete;
-
+    // TODO: 实现移动构造器  
+    /*
+    DynFibonacci(DynFibonacci &&others)noexcept :
+        cache(others.cache), cached(others.cached) {
+        //避免二次删除
+        others.cache = nullptr;
+        others.cached = 0; // 将源对象的资源转移到当前对象
+    }
+        */
+    //或者  
+    DynFibonacci(DynFibonacci &&others)noexcept :
+        cache(std::exchange(others.cache, nullptr)),
+        cached(std::exchange(others.cached, 0)) {
+        std::cout << "copy constructor called" << std::endl;
+    }
     // TODO: 实现移动赋值
     // NOTICE: ⚠ 注意移动到自身问题 ⚠
-    DynFibonacci &operator=(DynFibonacci &&) noexcept = delete;
+    //运算符重载 operator= 其中=是重载的符号
+    //右赋值赋值到左边
+    DynFibonacci &operator=(DynFibonacci &&others) noexcept {
+        //1.判断是否移动到自己 判断当前地址与others的地址是否一样
+        if(this != &others) { // 避免自我赋值
+            std::cout << "move assigment called" << std::endl;
+            //2.释放自己的资源 原地析构 
+            delete[] cache; // 释放当前对象的资源
+            //3.做移动赋值的操作
+            cache = std::exchange(others.cache, nullptr);
+            cached = std::exchange(others.cached, 0); // 转移资源
+        }
+        else{
+            std::cerr << "self move assignment" << std::endl;
+        }
+        //返回被赋值的坐值引用
+        return *this; // 返回当前对象的引用
+    };
 
     // TODO: 实现析构器，释放缓存空间
-    ~DynFibonacci();
+    ~DynFibonacci(){
+        delete[] cache; // 释放缓存空间
+    };
 
     // TODO: 实现正确的缓存优化斐波那契计算
     size_t operator[](int i) {
-        for (; false; ++cached) {
+        for (; cached <= i; ++cached) {
             cache[cached] = cache[cached - 1] + cache[cached - 2];
         }
         return cache[i];

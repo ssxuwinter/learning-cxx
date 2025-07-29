@@ -9,8 +9,10 @@ enum class DataType {
 /// @brief Tagged union 即标签化联合体，是联合体的一种常见应用。
 ///        Rust enum 在实现上就是标签化联合体。
 struct TaggedUnion {
+    //标签
     DataType type;
     // NOTICE: struct/union 可以相互任意嵌套。
+    //union:联合体 双管转换
     union {
         float f;
         double d;
@@ -18,13 +20,23 @@ struct TaggedUnion {
 };
 
 // TODO: 将这个函数模板化用于 sigmoid_dyn
-float sigmoid(float x) {
-    return 1 / (1 + std::exp(-x));
+template <class T>
+T sigmoid(T x) {
+    //static_cast 类型转换，编译时对类型进行转换
+    return static_cast<T>(1) / (static_cast<T>(1) + std::exp(-x));
 }
 
 TaggedUnion sigmoid_dyn(TaggedUnion x) {
     TaggedUnion ans{x.type};
     // TODO: 根据 type 调用 sigmoid
+    switch(x.type){
+        case DataType::Float:
+            ans.f = sigmoid(x.f);
+            break;
+        case DataType::Double:
+            ans.d = sigmoid(x.d);
+            break;
+    }
     return ans;
 }
 

@@ -37,11 +37,14 @@ ColorEnum convert_by_pun(Color c) {
 
     TypePun pun;
     // TODO: 补全类型双关转换
-
+    pun.c = c; // 将 Color 类型的值赋给 union 的成员 c
     return pun.e;
 }
 
 int main(int argc, char **argv) {
+    float a = 2.5,*p=&a;
+    std::cout << *(int *)p << std::endl // 输出 2
+            << *reinterpret_cast<int *>(p) << std::endl; // 输出 2
     ASSERT(convert_by_pun(Color::Red) == COLOR_RED, "Type punning conversion");
     ASSERT(convert_by_pun(Color::Green) == COLOR_GREEN, "Type punning conversion");
     ASSERT(convert_by_pun(Color::Yellow) == COLOR_YELLOW, "Type punning conversion");
